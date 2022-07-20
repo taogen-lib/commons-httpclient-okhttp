@@ -8,6 +8,8 @@ import com.taogen.commons.okhttp.vo.OkHttpRequestWithJson;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
 import java.nio.charset.StandardCharsets;
@@ -24,6 +26,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class BaseTest {
     public static final String APP_HEADER_KEY = "my-app-id";
     public static final String APP_HEADER_VALUE = "java-http-clients";
+    protected static MockWebServer mockWebServer;
+
+    protected String getMockWebServerUrl(String requestUri, String responseBody) {
+        MockResponse mockedResponse = new MockResponse()
+                .setBody(responseBody) //Sample
+                .addHeader("Content-Type", "application/json");
+        mockWebServer.enqueue(mockedResponse);
+        // http://127.0.0.1:{randomNumber}/
+        String url = mockWebServer.url(requestUri).toString();
+        log.info("url: {}", url);
+        return url;
+    }
+
     /**
      * validate request
      * <p>
@@ -82,6 +97,7 @@ public class BaseTest {
         log.debug("okHttpRequestWithFormData formDataMap: {}", requestFormDataMap);
         assertTrue(MapUtils.multiValueMapEquals(requestFormDataMap, mockedFormDataMap));
     }
+
     protected void validateRequestWithMultipartForm(RecordedRequest mockedRealRequest,
                                                     OkHttpRequestWithFormData okHttpRequestWithFormData) {
         validateRequestWithQueryString(mockedRealRequest, (OkHttpRequest) okHttpRequestWithFormData);
@@ -98,6 +114,7 @@ public class BaseTest {
         log.debug("okHttpRequestWithFormData formDataMap: {}", requestFormDataMap);
         assertTrue(MapUtils.multiValueMapEquals(requestFormDataMap, mockedFormDataMap));
     }
+
     protected Map<String, List<Object>> getQueryStringParamsByRecordedRequest(HttpUrl requestUrl) {
         Map<String, List<Object>> queryParams = requestUrl.queryParameterNames().stream()
                 .collect(HashMap::new, (map, key) -> map.put(key, new ArrayList<Object>(requestUrl.queryParameterValues(key))), Map::putAll);

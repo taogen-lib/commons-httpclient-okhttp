@@ -27,10 +27,7 @@ class OkHttpUtilTest extends BaseTest {
 
     public static final String CHINESE_TEST = "中文测试";
 
-
     public static final String RESPONSE_BODY_1 = "{\"id\": 1, \"name\": \"test\"}";
-
-    public static MockWebServer mockWebServer;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -85,16 +82,6 @@ class OkHttpUtilTest extends BaseTest {
         validateRequestWithJson(mockWebServer.takeRequest(), okHttpRequest);
     }
 
-    private String getMockWebServerUrl(String requestUri, String responseBody) {
-        MockResponse mockedResponse = new MockResponse()
-                .setBody(responseBody) //Sample
-                .addHeader("Content-Type", "application/json");
-        mockWebServer.enqueue(mockedResponse);
-        // http://127.0.0.1:{randomNumber}/
-        String url = mockWebServer.url(requestUri).toString();
-        log.info("url: {}", url);
-        return url;
-    }
 
     @Test
     void requestWithFormUrlEncoded() throws InterruptedException, IOException {

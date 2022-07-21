@@ -1,17 +1,13 @@
 package com.taogen.commons.okhttp;
 
-import com.taogen.commons.okhttp.enums.HttpMethod;
-import com.taogen.commons.okhttp.vo.OkHttpRequest;
-import com.taogen.commons.okhttp.vo.OkHttpRequestWithFormData;
-import com.taogen.commons.okhttp.vo.OkHttpRequestWithJson;
-import com.taogen.commons.okhttp.vo.OkHttpResponse;
+import com.taogen.easyhttpclient.enums.HttpMethod;
+import com.taogen.easyhttpclient.vo.*;
 import okhttp3.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,68 +21,97 @@ public class OkHttpUtil {
             .writeTimeout(15, TimeUnit.SECONDS)
             .build();
 
-    public static OkHttpResponse requestWithoutBody(OkHttpRequest request) throws IOException {
+    public static HttpResponse requestWithoutBody(HttpRequest request) throws IOException {
         Request.Builder requestBuilder = new Request.Builder()
-                .url(getHttpUrl(request.getUrl(), request.getQueryStringParams()));
-        if (request.getHeaders() != null) {
-            requestBuilder.headers(request.getHeaders());
+                .url(getHttpUrl(request.getUrl(), request.getQueryParams()));
+        if (request.getHeaders() != null && !request.getHeaders().isEmpty()) {
+            requestBuilder.headers(convertMapToOkHttpHeaders(request.getHeaders()));
         }
         addRequestMethod(requestBuilder, request.getMethod());
         try (Response response = OKHTTP_CLIENT.newCall(requestBuilder.build()).execute()) {
             // after response closed, the response body can't be read again.
             // so we need to save to a wrapper class object
-            return new OkHttpResponse(response.code(), response.headers(), response.body().bytes());
+            return new HttpResponse(response.code(), convertOkHttpHeadersToMap(response.headers()), response.body().bytes());
         }
     }
 
-    public static OkHttpResponse requestWithJson(OkHttpRequestWithJson request) throws IOException {
+    private static Map<String, List<Object>> convertOkHttpHeadersToMap(Headers headers) {
+        if (headers == null || headers.size() == 0) {
+            return Collections.emptyMap();
+        }
+        Map<String, List<Object>> resultMap = new HashMap<>();
+//        Iterator<Pair<String, String>> iterator = headers.iterator();
+        for (String name : headers.names()) {
+            if (resultMap.get(name) == null) {
+                resultMap.put(name, new ArrayList<>());
+            }
+            resultMap.get(name).add(headers.get(name));
+        }
+        return resultMap;
+    }
+
+    private static Headers convertMapToOkHttpHeaders(Map<String, List<Object>> map) {
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
+        Headers.Builder builder = new Headers.Builder();
+        for (Map.Entry<String, List<Object>> entry : map.entrySet()) {
+            for (Object value : entry.getValue()) {
+                builder.add(entry.getKey(), String.valueOf(value));
+            }
+        }
+        return builder.build();
+    }
+
+    public static HttpResponse requestWithJson(HttpRequestWithJson request) throws IOException {
         if (request.getMethod() == HttpMethod.GET) {
             throw new IllegalArgumentException("GET method can't use json body");
         }
         RequestBody requestBody = getJsonRequestBody(request.getJson());
         Request.Builder requestBuilder = new Request.Builder()
-                .url(getHttpUrl(request.getUrl(), request.getQueryStringParams()));
-        if (request.getHeaders() != null) {
-            requestBuilder.headers(request.getHeaders());
+                .url(getHttpUrl(request.getUrl(), request.getQueryParams()));
+        if (request.getHeaders() != null && !request.getHeaders().isEmpty()) {
+            requestBuilder.headers(convertMapToOkHttpHeaders(request.getHeaders()));
         }
         addRequestBody(requestBuilder, requestBody, request.getMethod());
         try (Response response = OKHTTP_CLIENT.newCall(requestBuilder.build()).execute()) {
-            return new OkHttpResponse(response.code(), response.headers(), response.body().bytes());
+            return new HttpResponse(response.code(), convertOkHttpHeadersToMap(response.headers()), response.body().bytes());
         }
     }
 
-    public static OkHttpResponse requestWithFormUrlEncoded(OkHttpRequestWithFormData okHttpRequest) throws IOException {
-        if (okHttpRequest.getMethod() == HttpMethod.GET) {
+    public static HttpResponse requestWithFormUrlEncoded(HttpRequestWithForm request) throws IOException {
+        if (request.getMethod() == HttpMethod.GET) {
             throw new IllegalArgumentException("GET method can't use form data body");
         }
         Request.Builder requestBuilder = new Request.Builder()
-                .url(getHttpUrl(okHttpRequest.getUrl(), okHttpRequest.getQueryStringParams()));
-        if (okHttpRequest.getHeaders() != null) {
-            requestBuilder.headers(okHttpRequest.getHeaders());
+                .url(getHttpUrl(request.getUrl(), request.getQueryParams()));
+        if (request.getHeaders() != null && !request.getHeaders().isEmpty()) {
+            requestBuilder.headers(convertMapToOkHttpHeaders(request.getHeaders()));
         }
-        addRequestBody(requestBuilder, getFormDataBody(okHttpRequest.getFormData()), okHttpRequest.getMethod());
+        addRequestBody(requestBuilder, getFormDataBody(request.getFormData()), request.getMethod());
         try (Response response = OKHTTP_CLIENT.newCall(requestBuilder.build()).execute()) {
-            return new OkHttpResponse(response.code(), response.headers(), response.body().bytes());
+            return new HttpResponse(response.code(), convertOkHttpHeadersToMap(response.headers()), response.body().bytes());
         }
     }
 
     /**
      * multipart fields are File objects
+     *
      * @return
      * @throws IOException
      */
-    public static OkHttpResponse requestWithFormData(OkHttpRequestWithFormData okHttpRequest) throws IOException {
-        if (okHttpRequest.getMethod() == HttpMethod.GET) {
+    public static HttpResponse requestWithFormData(HttpRequestWithMultipart request) throws IOException {
+        if (request.getMethod() == HttpMethod.GET) {
             throw new IllegalArgumentException("GET method can't use form data body");
         }
         Request.Builder requestBuilder = new Request.Builder()
-                .url(getHttpUrl(okHttpRequest.getUrl(), okHttpRequest.getQueryStringParams()));
-        if (okHttpRequest.getHeaders() != null) {
-            requestBuilder.headers(okHttpRequest.getHeaders());
+                .url(getHttpUrl(request.getUrl(), request.getQueryParams()));
+        if (request.getHeaders() != null && !request.getHeaders().isEmpty()) {
+            requestBuilder.headers(convertMapToOkHttpHeaders(request.getHeaders()));
         }
-        addRequestBody(requestBuilder, getMultipartBody(okHttpRequest.getFormData()), okHttpRequest.getMethod());
+        addRequestBody(requestBuilder, getMultipartBody(request.getFormData()), request.getMethod());
         try (Response response = OKHTTP_CLIENT.newCall(requestBuilder.build()).execute()) {
-            return new OkHttpResponse(response.code(), response.headers(), response.body().bytes());
+            return new HttpResponse(response.code(), convertOkHttpHeadersToMap(response.headers()), response.body().bytes());
         }
     }
 

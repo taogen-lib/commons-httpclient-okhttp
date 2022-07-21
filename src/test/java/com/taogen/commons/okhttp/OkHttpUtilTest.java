@@ -1,12 +1,9 @@
 package com.taogen.commons.okhttp;
 
-import com.taogen.commons.okhttp.enums.HttpMethod;
-import com.taogen.commons.okhttp.vo.OkHttpRequest;
-import com.taogen.commons.okhttp.vo.OkHttpRequestWithFormData;
-import com.taogen.commons.okhttp.vo.OkHttpRequestWithJson;
-import com.taogen.commons.okhttp.vo.OkHttpResponse;
+import com.taogen.easyhttpclient.MockWebServerUtils;
+import com.taogen.easyhttpclient.enums.HttpMethod;
+import com.taogen.easyhttpclient.vo.*;
 import lombok.extern.log4j.Log4j2;
-import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Log4j2
 class OkHttpUtilTest extends BaseTest {
-    public static final String RANDOM_TOKEN = "123456";
-
-    public static final String CHINESE_TEST = "中文测试";
-
     public static final String RESPONSE_BODY_1 = "{\"id\": 1, \"name\": \"test\"}";
 
     @BeforeEach
@@ -42,86 +36,94 @@ class OkHttpUtilTest extends BaseTest {
 
     @Test
     void requestWithoutBody_get() throws IOException, InterruptedException {
-        String url = getMockWebServerUrl("/testRequestWithoutBody_get", RESPONSE_BODY_1);
+        MockWebServerUtils.enqueueMockedResponse(mockWebServer, RESPONSE_BODY_1.getBytes(StandardCharsets.UTF_8), "application/json");
+        String url = MockWebServerUtils.getMockedUrlByUri(mockWebServer, "/testRequestWithoutBody_get");
+        log.info("url: {}", url);
         Map<String, List<Object>> queryParams = new HashMap<>();
         queryParams.put("id", Arrays.asList(1));
         queryParams.put("name", Arrays.asList("test"));
-        OkHttpRequest okHttpRequest = OkHttpRequest.builder()
+        HttpRequest okHttpRequest = HttpRequest.builder()
                 .url(url)
                 .method(HttpMethod.GET)
                 .headers(getOkHttpBasicHeaders())
-                .queryStringParams(queryParams)
+                .queryParams(queryParams)
                 .build();
-        OkHttpResponse okHttpResponse = OkHttpUtil.requestWithoutBody(okHttpRequest);
+        HttpResponse okHttpResponse = OkHttpUtil.requestWithoutBody(okHttpRequest);
         log.info("okHttpResponse: {}", okHttpResponse);
         // validate response
         assertEquals(200, okHttpResponse.getStatusCode());
-        assertEquals(RESPONSE_BODY_1, okHttpResponse.getBodyString());
+        assertEquals(RESPONSE_BODY_1, new String(okHttpResponse.getBody(), StandardCharsets.UTF_8));
         // validate request
         RecordedRequest request = mockWebServer.takeRequest();
-        validateRequestWithQueryString(request, okHttpRequest);
+        MockWebServerUtils.validateRequestWithQueryString(request, okHttpRequest);
     }
 
 
     @Test
     void requestWithJson() throws IOException, InterruptedException {
-        String url = getMockWebServerUrl("/testRequestWithJson", RESPONSE_BODY_1);
+        MockWebServerUtils.enqueueMockedResponse(mockWebServer, RESPONSE_BODY_1.getBytes(StandardCharsets.UTF_8), "application/json");
+        String url = MockWebServerUtils.getMockedUrlByUri(mockWebServer, "/testRequestWithJson");
+        log.info("url: {}", url);
         String requestBody = "{\"id\": 1}";
-        OkHttpRequestWithJson okHttpRequest = OkHttpRequestWithJson.builder()
+        HttpRequestWithJson okHttpRequest = HttpRequestWithJson.builder()
                 .url(url)
                 .method(HttpMethod.POST)
                 .headers(getOkHttpBasicHeaders())
                 .json(requestBody)
                 .build();
-        OkHttpResponse okHttpResponse = OkHttpUtil.requestWithJson(okHttpRequest);
+        HttpResponse okHttpResponse = OkHttpUtil.requestWithJson(okHttpRequest);
         log.info("okHttpResponse: {}", okHttpResponse);
         // validate response
         assertEquals(200, okHttpResponse.getStatusCode());
-        assertEquals(RESPONSE_BODY_1, okHttpResponse.getBodyString());
+        assertEquals(RESPONSE_BODY_1, new String(okHttpResponse.getBody(), StandardCharsets.UTF_8));
         // validate request
-        validateRequestWithJson(mockWebServer.takeRequest(), okHttpRequest);
+        MockWebServerUtils.validateRequestWithJson(mockWebServer.takeRequest(), okHttpRequest);
     }
 
 
     @Test
     void requestWithFormUrlEncoded() throws InterruptedException, IOException {
-        String url = getMockWebServerUrl("/testRequestWithFormUrlEncoded", RESPONSE_BODY_1);
+        MockWebServerUtils.enqueueMockedResponse(mockWebServer, RESPONSE_BODY_1.getBytes(StandardCharsets.UTF_8), "application/json");
+        String url = MockWebServerUtils.getMockedUrlByUri(mockWebServer, "/testRequestWithFormUrlEncoded");
+        log.info("url: {}", url);
         Map<String, List<Object>> formData = new HashMap<>();
         formData.put("id", Arrays.asList(1));
         formData.put("name", Arrays.asList("test", "test2"));
-        OkHttpRequestWithFormData okHttpRequest = OkHttpRequestWithFormData.builder()
+        HttpRequestWithForm okHttpRequest = HttpRequestWithForm.builder()
                 .url(url)
                 .method(HttpMethod.POST)
                 .headers(getOkHttpBasicHeaders())
                 .formData(formData)
                 .build();
-        OkHttpResponse okHttpResponse = OkHttpUtil.requestWithFormUrlEncoded(okHttpRequest);
+        HttpResponse okHttpResponse = OkHttpUtil.requestWithFormUrlEncoded(okHttpRequest);
         log.info("okHttpResponse: {}", okHttpResponse);
         // validate response
         assertEquals(200, okHttpResponse.getStatusCode());
-        assertEquals(RESPONSE_BODY_1, okHttpResponse.getBodyString());
+        assertEquals(RESPONSE_BODY_1, new String(okHttpResponse.getBody(), StandardCharsets.UTF_8));
         // validate request
-        validateRequestWithUrlEncodedForm(mockWebServer.takeRequest(), okHttpRequest);
+        MockWebServerUtils.validateRequestWithUrlEncodedForm(mockWebServer.takeRequest(), okHttpRequest);
     }
 
     @Test
     void requestWithFormData() throws InterruptedException, IOException {
-        String url = getMockWebServerUrl("/testRequestWithFormData", RESPONSE_BODY_1);
+        MockWebServerUtils.enqueueMockedResponse(mockWebServer, RESPONSE_BODY_1.getBytes(StandardCharsets.UTF_8), "application/json");
+        String url = MockWebServerUtils.getMockedUrlByUri(mockWebServer, "/testRequestWithFormData");
+        log.info("url: {}", url);
         Map<String, List<Object>> formData = new HashMap<>();
         formData.put("id", Arrays.asList(1));
         formData.put("name", Arrays.asList("test", "test2"));
-        OkHttpRequestWithFormData okHttpRequest = OkHttpRequestWithFormData.builder()
+        HttpRequestWithMultipart okHttpRequest = HttpRequestWithMultipart.builder()
                 .url(url)
                 .method(HttpMethod.POST)
                 .headers(getOkHttpBasicHeaders())
                 .formData(formData)
                 .build();
-        OkHttpResponse okHttpResponse = OkHttpUtil.requestWithFormData(okHttpRequest);
+        HttpResponse okHttpResponse = OkHttpUtil.requestWithFormData(okHttpRequest);
         log.info("okHttpResponse: {}", okHttpResponse);
         // validate response
         assertEquals(200, okHttpResponse.getStatusCode());
-        assertEquals(RESPONSE_BODY_1, okHttpResponse.getBodyString());
+        assertEquals(RESPONSE_BODY_1, new String(okHttpResponse.getBody(), StandardCharsets.UTF_8));
         // validate request
-        validateRequestWithMultipartForm(mockWebServer.takeRequest(), okHttpRequest);
+        MockWebServerUtils.validateRequestWithMultipartForm(mockWebServer.takeRequest(), okHttpRequest);
     }
 }

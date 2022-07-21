@@ -9,10 +9,10 @@
 		<version>-SNAPSHOT</version>
 	</parent>
 	<groupId>com.taogen</groupId>
-	<artifactId>httpclient-okhttp</artifactId>
+	<artifactId>easy-okhttp</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
-	<name>commons-httpclient-okhttp</name>
+	<name>Taogen Easy OkHttp</name>
 	<!-- FIXME change it to the project's website -->
 	<url>http://www.example.com</url>
 
@@ -60,9 +60,20 @@
 		<dependency>
 			<groupId>com.github.taogen-lib</groupId>
 			<artifactId>commons-java</artifactId>
+			<!--			<version>2b0c21ba94</version>-->
 			<version>-SNAPSHOT</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.github.taogen-lib</groupId>
+			<artifactId>easy-httpclient-common</artifactId>
+			<version>-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.taogen-lib</groupId>
+			<artifactId>easy-httpclient-test</artifactId>
+			<version>-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

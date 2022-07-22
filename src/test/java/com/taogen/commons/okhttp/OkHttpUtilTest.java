@@ -1,5 +1,6 @@
 package com.taogen.commons.okhttp;
 
+import com.taogen.commons.io.FileUtils;
 import com.taogen.easyhttpclient.MockWebServerUtils;
 import com.taogen.easyhttpclient.enums.HttpMethod;
 import com.taogen.easyhttpclient.vo.*;
@@ -10,7 +11,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +45,7 @@ class OkHttpUtilTest extends BaseTest {
         Map<String, List<Object>> queryParams = new HashMap<>();
         queryParams.put("id", Arrays.asList(1));
         queryParams.put("name", Arrays.asList("test"));
+        queryParams.put("testChinese", Arrays.asList(CHINESE_TEST));
         HttpRequest okHttpRequest = HttpRequest.builder()
                 .url(url)
                 .method(HttpMethod.GET)
@@ -105,13 +109,16 @@ class OkHttpUtilTest extends BaseTest {
     }
 
     @Test
-    void requestWithFormData() throws InterruptedException, IOException {
+    void requestWithFormData() throws InterruptedException, IOException, URISyntaxException {
         MockWebServerUtils.enqueueMockedResponse(mockWebServer, RESPONSE_BODY_1.getBytes(StandardCharsets.UTF_8), "application/json");
         String url = MockWebServerUtils.getMockedUrlByUri(mockWebServer, "/testRequestWithFormData");
         log.info("url: {}", url);
         Map<String, List<Object>> formData = new HashMap<>();
         formData.put("id", Arrays.asList(1));
         formData.put("name", Arrays.asList("test", "test2"));
+        formData.put("file", Arrays.asList(
+                new File(FileUtils.getFilePathByFileClassPath("test/test.jpg")),
+                new File(FileUtils.getFilePathByFileClassPath("test/test.txt"))));
         HttpRequestWithMultipart okHttpRequest = HttpRequestWithMultipart.builder()
                 .url(url)
                 .method(HttpMethod.POST)

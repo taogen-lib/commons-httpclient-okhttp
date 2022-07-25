@@ -21,7 +21,6 @@ import java.util.function.Function;
 
 @Log4j2
 class OkHttpUtilTest extends BaseTest {
-    public static final String RESPONSE_BODY_1 = "{\"id\": 1, \"name\": \"test\"}";
 
     @BeforeEach
     void setUp() throws IOException {
@@ -44,14 +43,15 @@ class OkHttpUtilTest extends BaseTest {
             HttpRequest httpRequest = HttpRequest.builder()
                     .url(url)
                     .method(HttpMethod.GET)
-                    .headers(getOkHttpBasicHeaders())
+                    .headers(getBasicHeaders())
                     .queryParams(queryParams)
                     .build();
             return httpRequest;
         };
         Function<HttpRequest, HttpResponse> getResponse = httpRequest -> {
             try {
-                return OkHttpUtil.requestWithoutBody(httpRequest);
+                HttpResponse httpResponse = OkHttpUtil.requestWithoutBody(httpRequest);
+                return httpResponse;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -66,7 +66,7 @@ class OkHttpUtilTest extends BaseTest {
             return HttpRequestWithJson.builder()
                     .url(url)
                     .method(HttpMethod.POST)
-                    .headers(getOkHttpBasicHeaders())
+                    .headers(getBasicHeaders())
                     .json(requestBody)
                     .build();
         };
@@ -91,7 +91,7 @@ class OkHttpUtilTest extends BaseTest {
             return HttpRequestWithForm.builder()
                     .url(url)
                     .method(HttpMethod.POST)
-                    .headers(getOkHttpBasicHeaders())
+                    .headers(getBasicHeaders())
                     .formData(formData)
                     .build();
         };
@@ -122,7 +122,7 @@ class OkHttpUtilTest extends BaseTest {
             return HttpRequestWithMultipart.builder()
                     .url(url)
                     .method(HttpMethod.POST)
-                    .headers(getOkHttpBasicHeaders())
+                    .headers(getBasicHeaders())
                     .formData(formData)
                     .build();
         };

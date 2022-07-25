@@ -17,7 +17,7 @@ public class BaseTest {
     public static final String APP_HEADER_VALUE = "java-http-clients";
     protected static MockWebServer mockWebServer;
 
-    protected Map<String, List<Object>> getOkHttpBasicHeaders() {
+    protected Map<String, List<Object>> getBasicHeaders() {
 //        Headers headers = new Headers.Builder()
 //                .add(APP_HEADER_KEY, APP_HEADER_VALUE)
 //                .build();

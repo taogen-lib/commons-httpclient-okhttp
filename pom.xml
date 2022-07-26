@@ -10,13 +10,14 @@
 	</parent>
 	<groupId>com.taogen</groupId>
 	<artifactId>easy-okhttp</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>4.10.0.0</version>
 
 	<name>Taogen Easy OkHttp</name>
 	<!-- FIXME change it to the project's website -->
 	<url>http://www.example.com</url>
 
 	<properties>
+		<okhttp.version>4.10.0</okhttp.version>
 	</properties>
 
 	<repositories>
@@ -51,6 +52,7 @@
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
+			<version>${okhttp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>

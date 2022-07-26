@@ -78,7 +78,7 @@ class OkHttpUtilTest extends BaseTest {
                 throw new RuntimeException(e);
             }
         };
-        MockWebServerTest.testRequestWithJson(mockWebServer, getHttpRequest, getResponse);
+        MockWebServerTest.testPostWithJson(mockWebServer, getHttpRequest, getResponse);
     }
 
 
@@ -103,7 +103,7 @@ class OkHttpUtilTest extends BaseTest {
                 throw new RuntimeException(e);
             }
         };
-        MockWebServerTest.testRequestWithUrlEncodedForm(mockWebServer, getHttpRequest, getResponse);
+        MockWebServerTest.testPostWithUrlEncodedForm(mockWebServer, getHttpRequest, getResponse);
     }
 
     @Test
@@ -134,6 +134,6 @@ class OkHttpUtilTest extends BaseTest {
                 throw new RuntimeException(e);
             }
         };
-        MockWebServerTest.testRequestWithMultipartForm(mockWebServer, getHttpRequest, getResponse);
+        MockWebServerTest.testPostWithMultipartForm(mockWebServer, getHttpRequest, getResponse);
     }
 }

@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>com.github.taogen-lib</groupId>
 			<artifactId>easy-httpclient-test</artifactId>
-			<version>e3ee347abf</version>
+			<version>d6574bbb9d</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
